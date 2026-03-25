@@ -81,7 +81,7 @@ verifyEmailTransport()
 export default app
 
 async function start() {
-  const port = config.port || 3000
+ const port = process.env.PORT || config.port || 3000
   await new Promise((resolve) => {
     app.listen(port, () => {
       console.log(`API listening on http://localhost:${port}`)
@@ -94,7 +94,7 @@ const entryPath = process.argv[1] ? resolve(process.argv[1]) : ''
 const isRunDirect = entryPath && fileURLToPath(import.meta.url) === entryPath
 if (isRunDirect) {
   start().catch((err) => {
-    console.error(err)
-    process.exit(1)
-  })
+  console.error(err)
+  process.exit(1)
+})
 }
