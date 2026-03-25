@@ -1,0 +1,8 @@
+node_modules/
+.env
+*.env
+*.env.example
+>>>>>>> 062b50092c6833b942308abb8ecad593f1927d74:Backend/.gitignore
+dist/
+build/
+.DS_Store
