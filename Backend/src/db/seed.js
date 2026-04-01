@@ -11,6 +11,7 @@ async function seed() {
     (await db.getUniversityByName('African Methodist Episcopal University')) || (await db.createUniversity(db.uuid(), 'African Methodist Episcopal University', 1)),
     (await db.getUniversityByName('Starz University')) || (await db.createUniversity(db.uuid(), 'Starz University', 1)),
     (await db.getUniversityByName('Bluecrest University College')) || (await db.createUniversity(db.uuid(), 'Bluecrest University College', 1)),
+    (await db.getUniversityByName('Don Bosco Technical High School')) || (await db.createUniversity(db.uuid(), 'Don Bosco Technical High School', 1)),
   ]
   const ame = universities.find((u) => u.name === 'African Methodist Episcopal University') || universities[0]
 

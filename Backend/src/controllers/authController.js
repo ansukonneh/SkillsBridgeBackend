@@ -99,6 +99,23 @@ export async function login(req, res, next) {
   }
 }
 
+export async function adminLogin(req, res, next) {
+  try {
+    const { email, password } = req.body
+    const user = await db.getUserByEmailWithUniversity(email)
+    if (!user) return error(res, 'Invalid email or password', 401)
+    if (user.role !== 'admin') return error(res, 'Admin access only', 403)
+    if (user.isSuspended) return error(res, 'Account suspended', 403)
+    const valid = await bcrypt.compare(password, user.password)
+    if (!valid) return error(res, 'Invalid email or password', 401)
+
+    const token = signToken(user.id, user.role)
+    return success(res, { user: toUserResponse(user), token, role: user.role })
+  } catch (e) {
+    next(e)
+  }
+}
+
 export async function verifyEmail(req, res, next) {
   try {
     const { token } = req.body

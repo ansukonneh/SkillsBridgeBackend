@@ -445,14 +445,23 @@ export async function deleteUserSkillsByUserId(userId) {
 }
 
 // --- Explore ---
-export async function getPublicStudents({ universityId, skill, sort = 'newest', limit = 10, offset = 0 }) {
+export async function getPublicStudents({ universityId, skill, q, excludeUserId, sort = 'newest', limit = 10, offset = 0 }) {
   let where = "u.role = 'student' AND u.isPublic = 1 AND u.isSuspended = 0"
   const params = []
   if (universityId) {
     where += ' AND u.universityId = ?'
     params.push(universityId)
   }
-  if (skill) {
+  if (excludeUserId) {
+    where += ' AND u.id <> ?'
+    params.push(excludeUserId)
+  }
+  if (q) {
+    where +=
+      ' AND (u.fullName LIKE ? OR EXISTS (SELECT 1 FROM UserSkill us JOIN Skill s ON us.skillId = s.id WHERE us.userId = u.id AND s.name LIKE ?))'
+    const like = '%' + String(q) + '%'
+    params.push(like, like)
+  } else if (skill) {
     where += ' AND EXISTS (SELECT 1 FROM UserSkill us JOIN Skill s ON us.skillId = s.id WHERE us.userId = u.id AND s.name LIKE ?)'
     params.push('%' + skill + '%')
   }
@@ -462,14 +471,14 @@ export async function getPublicStudents({ universityId, skill, sort = 'newest', 
   const orderBy = (() => {
     switch (String(sort || '').toLowerCase()) {
       case 'name_asc':
-        return 'u.fullName ASC, u.updatedAt DESC'
+        return 'u.fullName ASC, u.createdAt DESC'
       case 'name_desc':
-        return 'u.fullName DESC, u.updatedAt DESC'
+        return 'u.fullName DESC, u.createdAt DESC'
       case 'oldest':
-        return 'u.updatedAt ASC'
+        return 'u.createdAt ASC'
       case 'newest':
       default:
-        return 'u.updatedAt DESC'
+        return 'u.createdAt DESC'
     }
   })()
   const sql = `SELECT u.id FROM User u WHERE ${where} ORDER BY ${orderBy} LIMIT ? OFFSET ?`

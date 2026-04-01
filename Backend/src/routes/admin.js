@@ -5,8 +5,13 @@ import { validateRequest } from '../middleware/validateRequest.js'
 import { patchUniversityRequestSchema, suspendUserSchema } from '../validators/admin.js'
 import { createUniversitySchema } from '../validators/university.js'
 import * as ctrl from '../controllers/adminController.js'
+import { loginSchema } from '../validators/auth.js'
+import { adminLogin } from '../controllers/authController.js'
 
 const router = Router()
+
+// Admin-only login (no auth required). Mounted at /api/admin, so this is POST /api/admin
+router.post('/', validateRequest(loginSchema), adminLogin)
 
 router.use(authenticate)
 router.use(authorizeRole('admin'))

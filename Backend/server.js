@@ -19,6 +19,7 @@ import adminRoutes from './src/routes/admin.js'
 import messagesRoutes from './src/routes/messages.js'
 import newsletterRoutes from './src/routes/newsletter.js'
 import { isEmailConfigured, verifyEmailTransport } from './src/utils/email.js'
+import { optionalAuth } from './src/middleware/optionalAuth.js'
 
 const app = express()
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -36,7 +37,7 @@ app.use('/api/auth/register', authLimiter)
 app.use('/api/auth', authRoutes)
 app.use('/api/students', studentsRoutes)
 app.use('/api/projects', projectsRoutes)
-app.get('/api/explore', exploreCtrl.getStudents)
+app.get('/api/explore', optionalAuth, exploreCtrl.getStudents)
 app.use('/api/explore', exploreRoutes)
 app.use('/api/universities', universitiesRoutes)
 app.use('/api/admin', adminRoutes)
@@ -81,7 +82,7 @@ verifyEmailTransport()
 export default app
 
 async function start() {
- const port = process.env.PORT || config.port || 3000
+  const port = config.port || 3000
   await new Promise((resolve) => {
     app.listen(port, () => {
       console.log(`API listening on http://localhost:${port}`)
@@ -94,7 +95,7 @@ const entryPath = process.argv[1] ? resolve(process.argv[1]) : ''
 const isRunDirect = entryPath && fileURLToPath(import.meta.url) === entryPath
 if (isRunDirect) {
   start().catch((err) => {
-  console.error(err)
-  process.exit(1)
-})
+    console.error(err)
+    process.exit(1)
+  })
 }
