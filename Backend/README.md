@@ -33,6 +33,75 @@ npm start
 
 API base URL: `http://localhost:3000` (frontend should set `VITE_API_BASE_URL=http://localhost:3000/api`).
 
+## Deploy on Railway
+
+This backend can be deployed directly to Railway from this repo.
+
+### 1) Create service
+
+1. Push your latest code to GitHub.
+2. In Railway, create a new project and choose your repo.
+3. Set the service **Root Directory** to `Backend`.
+4. Railway will detect Node and run `npm start`.
+   - `Backend/railway.toml` is included with:
+     - start command: `npm start`
+     - healthcheck: `/api/health`
+
+### 2) Add required environment variables
+
+Set these in Railway service variables:
+
+- `NODE_ENV=production`
+- `PORT` (Railway provides this automatically, leave as-is)
+- `JWT_SECRET=<strong-random-secret>`
+- `FRONTEND_ORIGIN=<your-frontend-url>`  
+  Example: `https://skillsbridge-frontend.up.railway.app`
+- `FRONTEND_URL=<your-frontend-url>`
+
+Optional:
+
+- `JWT_EXPIRES_IN=7d`
+- `BCRYPT_ROUNDS=10`
+- SMTP vars for email verification:
+  - `SMTP_HOST`
+  - `SMTP_PORT`
+  - `SMTP_USER`
+  - `SMTP_PASS`
+  - `SMTP_FROM`
+  - `SMTP_SECURE`
+
+### 3) Configure persistent SQLite storage (important)
+
+SQLite needs persistent disk storage in production.
+
+1. In Railway, add a **Volume** to the backend service.
+2. Mount path: `/data`
+3. Add env var: `SQLITE_DIR=/data`
+
+If you skip this, your DB may reset on redeploy/restart.
+
+### 4) Seed initial admin user
+
+Set these env vars first:
+
+- `ADMIN_EMAIL=<admin-email>`
+- `ADMIN_PASSWORD=<strong-password>`
+
+Then run the one-off command in Railway service shell:
+
+```bash
+npm run db:seed
+```
+
+### 5) Verify deployment
+
+- Health check: `https://<your-backend-domain>/api/health`
+- API root: `https://<your-backend-domain>/api`
+
+Frontend should use:
+
+`VITE_API_BASE_URL=https://<your-backend-domain>/api`
+
 ## API response format
 
 - **Success:** `{ success: true, data: <payload> }`
